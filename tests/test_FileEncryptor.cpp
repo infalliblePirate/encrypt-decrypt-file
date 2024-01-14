@@ -5,13 +5,15 @@
 
 TEST(FileEncryptor, Encryption) {
     const std::string source_path = "../data/text.txt";
-    // key is 5;
+    const std::istringstream simulated_input("5"); // redirect the standard input to read from simulated_input
+    std::cin.rdbuf(simulated_input.rdbuf());
     EXPECT_EQ(FileEncryptor::encrypt(source_path), "Mjqqt\\twqi&");
 }
 
 TEST(FileEncryptor, Decrypt) {
     const std::string encrypted_path = "../data/encrypted.txt";
-    // key is 5
+    const std::istringstream simulated_input("5");
+    std::cin.rdbuf(simulated_input.rdbuf());
     EXPECT_EQ(FileEncryptor::decrypt(encrypted_path), "HelloWorld!");
 }
 
