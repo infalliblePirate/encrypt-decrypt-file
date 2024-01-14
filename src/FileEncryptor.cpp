@@ -27,7 +27,7 @@ std::string FileEncryptor::decrypt(const std::string &encrypted_path) {
 
   std::fstream fin, fout;
   fin.open("../data/encrypted.txt", std::fstream::in);
-  fout.open("decrypted.txt", std::fstream::out);
+  fout.open("../data/decrypted.txt", std::fstream::out);
 
   std::string decrypted_txt;
   char c;
