@@ -1,8 +1,11 @@
 #include "../include/FileEncryptor.h"
 #include <fstream>
+#include <iostream>
 
 std::string FileEncryptor::encrypt(const std::string &source_path) {
-  int key = 5;
+  std::cout << "key: ";
+  int key;
+  std::cin >> key;
 
   std::fstream fin, fout;
   fin.open(source_path, std::fstream::in);
@@ -23,7 +26,9 @@ std::string FileEncryptor::encrypt(const std::string &source_path) {
 }
 
 std::string FileEncryptor::decrypt(const std::string &encrypted_path) {
-  int key = 5;
+  std::cout << "key: ";
+  int key;
+  std::cin >> key;
 
   std::fstream fin, fout;
   fin.open("../data/encrypted.txt", std::fstream::in);
@@ -31,7 +36,7 @@ std::string FileEncryptor::decrypt(const std::string &encrypted_path) {
 
   std::string decrypted_txt;
   char c;
-  while(fin >> c) {
+  while (fin >> c) {
     int temp = c - key;
 
     fout << static_cast<char>(temp);
