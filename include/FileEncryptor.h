@@ -5,9 +5,9 @@
 
 class FileEncryptor {
 public:
-  static std::string encrypt(const std::string& source_path);
+  static std::string encrypt(const std::string& source_path, int key);
 
-  static std::string decrypt(const std::string& encrypted_path);
+  static std::string decrypt(const std::string& encrypted_path, int key);
 };
 
 
