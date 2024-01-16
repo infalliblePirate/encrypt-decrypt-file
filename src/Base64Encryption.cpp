@@ -8,40 +8,42 @@ namespace base64 {
   const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
       "abcdefghijklmnopqrstuvwxyz"
       "0123456789+/";
+  const int CHUNK_SIZE = 3;
+  const int BITS_PER_BYTE = 8;
+  const int BASE64_BITS = 6;
+  const char PADDING_CHAR = '-';
+  const int BITS_MASK = 0x3F;
 
   std::string Base64Encryption::encode(const std::string &source_path) {
     std::string result;
-    std::fstream fin, fout;
+    std::ifstream fin;
 
     fin.open(source_path, std::fstream::in);
-    fout.open("../data/encrypted.txt", std::fstream::out);
-    if (!fin.is_open() || !fout.is_open()) {
-      std::cerr << "Could not open files." << std::endl;
+    if (!fin.is_open()) {
+      std::cerr << "Could not open the input file" << std::endl;
       return "";
     }
 
     bool can_continue = true;
     int remaining;
     while (can_continue) {
-      char buffer[3];
+      char buffer[CHUNK_SIZE];
       fin.read(buffer, sizeof(buffer)); // extracts 3 bytes and stores 'em in the buffer
 
       remaining = fin.gcount();
       if (remaining == 0) break;
-      if (remaining < 3) can_continue = false;
+      if (remaining < CHUNK_SIZE) can_continue = false;
       // in case in fin there are 1 or 2 chars, read from buffer till the 1 or 2 char respectively
 
-      std::bitset<24> bits; // fixed-size sequence of 24 bits
+      std::bitset<CHUNK_SIZE * BITS_PER_BYTE> bits; // fixed-size sequence of 24 bits
       for (size_t i = 0; i < remaining; ++i) {
-        bits |= static_cast<unsigned char>(buffer[i]) << (8 * (2 - i)); // left-shifts by these many positions
+        bits |= static_cast<unsigned char>(buffer[i]) << (BITS_PER_BYTE * (CHUNK_SIZE - 1 - i)); // left-shifts by these many positions
       }
 
       for (size_t i = 0; i < remaining + 1; ++i) {
-        result += base64_chars[(bits >> (6 * (3 - i))).to_ulong() & 0x3F];
+        result += base64_chars[(bits >> (BASE64_BITS * (CHUNK_SIZE - i))).to_ulong() & BITS_MASK];
         // right-shifts + intersects with 00111111 so that only last 6 bits are considered
-        fout << base64_chars[(bits >> (6 * (3 - i))).to_ullong() & 0x3F];
       }
-
       /*Example:
        * i = 0; right-shift by 18
        * 11011010 01100001 01010101 >>18: 0000000 00000000 00110110, AND 00111111 =
@@ -53,13 +55,20 @@ namespace base64 {
 
     // padding
     if (remaining != 0)
-      for (size_t i = 0; i < 3 - remaining; ++i) {
-        fout << '=';
-        result += '=';
+      for (size_t i = 0; i < CHUNK_SIZE - remaining; ++i) {
+        result += PADDING_CHAR;
       }
-
     fin.close();
-    fout.close();
+
+    std::ofstream fout("../data/encrypted.txt");
+    if (fout.is_open()) {
+      fout << result;
+      fout.close();
+    } else {
+      std::cerr << "Could not open the output file." << std::endl;
+      return "";
+    }
+
     return result;
   }
 
