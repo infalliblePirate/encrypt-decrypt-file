@@ -11,7 +11,7 @@ namespace base64 {
   const int CHUNK_SIZE = 3;
   const int BITS_PER_BYTE = 8;
   const int BASE64_BITS = 6;
-  const char PADDING_CHAR = '-';
+  const char PADDING_CHAR = '=';
   const int BITS_MASK = 0x3F;
 
   std::string Base64Encryption::encode(const std::string &source_path) {
@@ -24,17 +24,12 @@ namespace base64 {
       return "";
     }
 
-    bool can_continue = true;
     int remaining;
-    while (can_continue) {
-      char buffer[CHUNK_SIZE];
-      fin.read(buffer, sizeof(buffer)); // extracts 3 bytes and stores 'em in the buffer
+    char buffer[CHUNK_SIZE];
+    while (fin.read(buffer, sizeof(buffer)) || fin.gcount() > 0) {
+      // extracts 3 bytes and stores 'em in the buffer
 
-      remaining = fin.gcount();
-      if (remaining == 0) break;
-      if (remaining < CHUNK_SIZE) can_continue = false;
-      // in case in fin there are 1 or 2 chars, read from buffer till the 1 or 2 char respectively
-
+      remaining = fin.gcount();// in case in fin there are 1 or 2 chars, read from buffer till the 1 or 2 char respectively
       std::bitset<CHUNK_SIZE * BITS_PER_BYTE> bits; // fixed-size sequence of 24 bits
       for (size_t i = 0; i < remaining; ++i) {
         bits |= static_cast<unsigned char>(buffer[i]) << (BITS_PER_BYTE * (CHUNK_SIZE - 1 - i)); // left-shifts by these many positions
